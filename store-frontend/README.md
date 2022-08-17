@@ -1,0 +1,1 @@
+docker exec -it imersao-fullcycle-3-store-frontend-app  bash
