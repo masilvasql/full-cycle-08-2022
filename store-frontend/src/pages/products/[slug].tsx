@@ -1,16 +1,16 @@
 import { Button, Card, CardActions, CardContent, CardHeader, CardMedia, Typography } from '@material-ui/core'
-import type { NextPage } from 'next'
+import axios from 'axios'
+import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
-import { Product, products } from '../../model'
+import { useRouter } from 'next/router'
+import http from '../../http'
+import { Product } from '../../model'
 
 interface ProductDetailPageProps {
     product: Product
 }
 
-const ProductDetailPage: NextPage = () => {
-
-    const product = products[0];
-
+const ProductDetailPage: NextPage<ProductDetailPageProps> = ({product}) => {
     return (
         <div>
             <Head>
@@ -39,3 +39,37 @@ const ProductDetailPage: NextPage = () => {
 }
 
 export default ProductDetailPage
+
+export const getStaticProps:GetStaticProps<ProductDetailPageProps, {slug:string}> = async (context) => {
+    const {slug} = context.params!;
+    try{
+        const {data: product} = await http.get(`products/${slug}`)
+        return{
+            props:{
+                product 
+            },
+            revalidate:1*60*2
+        }
+    }catch(error){
+        if(axios.isAxiosError(error) && error.response?.status === 404){
+            return{
+                notFound:true
+            }
+        }
+        throw error
+    }
+   
+}
+
+export const getStaticPaths: GetStaticPaths = async (context) => {
+    const {data: product} = await http.get(`products`)
+    const paths =  product.map((product:Product) => ({
+        params: {
+            slug: product.slug
+        }
+    }))
+    return{paths, fallback: 'blocking'}
+    //false => não vai ter nova informação ou se tiver eu vou rodar o build
+    //true => podem ter novas informações e quando tiver é pra ele gerar de forma estática em tempo de execução
+    //blocking => pode ter novas informações e quando tiver é pra ele gerar de forma estática em tempo de build
+} 

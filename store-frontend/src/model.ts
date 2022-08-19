@@ -21,11 +21,11 @@ export const products: Product[] = [
     },
     {
         id:"uuid",
-        name:"Product 1",
-        description: "This is a product",
+        name:"Product 2",
+        description: "This is a product 2",
         price: 100.0,
         image_url: "https://source.unsplash.com/random?product," + Math.random(),
-        slug: "product-1",
+        slug: "product-2",
         created_at: new Date().toDateString()
       }
   ]
